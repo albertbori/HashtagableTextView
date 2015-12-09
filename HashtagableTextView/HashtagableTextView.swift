@@ -173,8 +173,3 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
         }
     }
 }
-
-enum WordType: Int {
-    case Hashtag = 1,
-    Mention = 2
-}
