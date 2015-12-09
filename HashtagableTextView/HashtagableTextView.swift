@@ -129,14 +129,17 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
             //set up table
             let parentView = window ?? self
             let tableYPosition = self.frame.origin.y + cursorFrame.height
-            let tableHeight = parentView.frame.height - tableYPosition
-            let tableView = UITableView(frame: CGRect(x: 0, y: tableYPosition, width: parentView.frame.width, height: tableHeight))
+            //let tableHeight = parentView.frame.height - tableYPosition
+            let tableView = UITableView()
+            tableView.translatesAutoresizingMaskIntoConstraints = false
             tableView.tableFooterView = UIView(frame: CGRectZero)
-            tableView.backgroundColor = UIColor(white: 0.7, alpha: 1)
+            tableView.backgroundColor = UIColor(white: 0.8, alpha: 1)
             tableView.rowHeight = 36
             tableView.dataSource = self
             tableView.delegate = self
             parentView.addSubview(tableView)
+            parentView.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-\(tableYPosition)-[tableView]-0-|", options: [], metrics: nil, views: ["tableView": tableView]))
+            parentView.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-0-[tableView]-0-|", options: [], metrics: nil, views: ["tableView": tableView]))
             _tableView = tableView
         } else {
             _tableView?.reloadData()
@@ -149,6 +152,14 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
             _tableView?.tableHeaderView = label
         } else {
             _tableView?.tableHeaderView = nil
+        }
+    }
+    
+    override public func layoutSubviews() {
+        super.layoutSubviews()
+        if _tableView != nil {
+            let cursorFrame = self.caretRectForPosition(self.selectedTextRange!.start)
+            self.contentOffset = CGPoint(x: 0, y: cursorFrame.origin.y)
         }
     }
     

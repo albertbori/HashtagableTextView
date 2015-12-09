@@ -12,6 +12,10 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var hashtagableTextView: HashtagableTextView!
     
+//    override func willRotateToInterfaceOrientation(toInterfaceOrientation: UIInterfaceOrientation, duration: NSTimeInterval) {
+//        hashtagableTextView.updateSuggestedHashtagPosition()
+//    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
