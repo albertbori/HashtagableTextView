@@ -12,6 +12,7 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
     
     public var highlightColor: UIColor?
     public var didStartTypingHashtag: ((partialHashtag: String) -> ())?
+    public var suggestedHashtagHeaderText: String?
     private var _tableView: UITableView?
     private var _hashtagSuggestions: [String] = []
     private var _partialHashtagRange: Range<String.Index>?
@@ -20,6 +21,7 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
         super.init(coder: aDecoder)
         self.delegate = self
     }
+    
     
     //MARK - UITextViewDelegate
     
@@ -37,7 +39,12 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
         }
     }
     
+    
     //MARK - UITableViewDataSource
+    
+    public func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return suggestedHashtagHeaderText
+    }
     
     public func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return _hashtagSuggestions.count
@@ -46,15 +53,26 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
     public func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let tableViewCell = UITableViewCell()
         tableViewCell.textLabel?.text = _hashtagSuggestions[indexPath.row]
+        tableViewCell.textLabel?.font = UIFont.systemFontOfSize(UIFont.systemFontSize())
         return tableViewCell
     }
     
     public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        guard _hashtagSuggestions.count >= indexPath.row else {
+            clearSuggestedHashtags()
+            return
+        }
+
         //grab cursor position for replacement after change
         let cursorOffset = self.offsetFromPosition(self.beginningOfDocument, toPosition: self.selectedTextRange!.start)
         let currentLength = self.text.characters.count
         
-        self.text.replaceRange(_partialHashtagRange!, with: _hashtagSuggestions[indexPath.row] + " ")
+        var selectedHashtag = _hashtagSuggestions[indexPath.row]
+        if !selectedHashtag.hasPrefix("#") {
+            selectedHashtag = "#" + selectedHashtag
+        }
+        
+        self.text.replaceRange(_partialHashtagRange!, with: selectedHashtag + " ")
         
         //restore cursor position
         if cursorOffset != currentLength {
@@ -68,6 +86,7 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
         highlightHashtags()
         clearSuggestedHashtags()
     }
+    
     
     //MARK - Helper methods
     
@@ -102,27 +121,45 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
     
     public func showSuggestedHashtags(hashtagSuggestions: [String]) {
         _hashtagSuggestions = hashtagSuggestions
-        guard _hashtagSuggestions.count > 0 else {
-            return
-        }
         if _tableView == nil {
+            //scroll to correct position
             let cursorFrame = self.caretRectForPosition(self.selectedTextRange!.start)
-            let tableTopPosition = cursorFrame.origin.y + cursorFrame.size.height
-            let tableView = UITableView(frame: CGRect(x: 0, y: tableTopPosition + self.frame.origin.y, width: window!.frame.width, height: self.frame.height - tableTopPosition))
+            self.contentOffset = CGPoint(x: 0, y: cursorFrame.origin.y)
+            
+            //set up table
+            let parentView = window ?? self
+            let tableYPosition = self.frame.origin.y + cursorFrame.height
+            let tableHeight = parentView.frame.height - tableYPosition
+            let tableView = UITableView(frame: CGRect(x: 0, y: tableYPosition, width: parentView.frame.width, height: tableHeight))
+            tableView.tableFooterView = UIView(frame: CGRectZero)
+            tableView.backgroundColor = UIColor(white: 0.7, alpha: 1)
+            tableView.rowHeight = 36
             tableView.dataSource = self
             tableView.delegate = self
-            window!.addSubview(tableView)
+            parentView.addSubview(tableView)
             _tableView = tableView
         } else {
             _tableView?.reloadData()
         }
+        
+        if _hashtagSuggestions.count == 0 {
+            let label = UILabel()
+            label.textColor = UIColor.lightGrayColor()
+            label.text = "No suggestions found."
+            _tableView?.tableHeaderView = label
+        } else {
+            _tableView?.tableHeaderView = nil
+        }
     }
     
     private func clearSuggestedHashtags() {
-        _tableView?.removeFromSuperview()
-        _tableView = nil
-        _partialHashtagRange = nil
-        _hashtagSuggestions = []
+        if _tableView != nil {
+            _tableView?.removeFromSuperview()
+            _tableView = nil
+            _partialHashtagRange = nil
+            _hashtagSuggestions = []
+            self.contentOffset = CGPointZero
+        }
     }
 }
 
