@@ -39,6 +39,10 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
         }
     }
     
+    public func textViewDidEndEditing(textView: UITextView) {
+        clearSuggestedHashtags()
+    }
+    
     
     //MARK - UITableViewDataSource
     
