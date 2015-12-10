@@ -16,13 +16,28 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
     public var tableBackgroundColor: UIColor = UIColor(white: 0.8, alpha: 1)
     public var didStartTypingHashtag: ((partialHashtag: String) -> ())?
     public var suggestedHashtagHeaderText: String?
+    
     private var _tableView: UITableView?
+    private var _tableViewBorder: UIView?
     private var _hashtagSuggestions: [String] = []
     private var _partialHashtagRange: Range<String.Index>?
+    private var _isTypingHashtag: Bool = false
+    private var _tableTopConstraint: NSLayoutConstraint? {
+        get {
+            return _tableView?.constraintsAffectingLayoutForAxis(.Vertical).filter({$0.firstAttribute == .Top && $0.secondAttribute == .Top }).first
+        }
+    }
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.delegate = self
+    }
+    
+    override public func layoutSubviews() {
+        super.layoutSubviews()
+        if _tableView != nil {
+            positionTableView()
+        }
     }
     
     
@@ -35,9 +50,11 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
         let cursorOffset = self.offsetFromPosition(self.beginningOfDocument, toPosition: self.selectedTextRange!.start)
         let typedString = self.text.substringWithRange(self.text.startIndex.advancedBy(0)..<self.text.startIndex.advancedBy(cursorOffset))
         if let unfinishedHashtagRange = typedString.rangeOfString("#[a-z0-1_]+$", options: [.RegularExpressionSearch, .CaseInsensitiveSearch]) {
+            _isTypingHashtag = true
             _partialHashtagRange = unfinishedHashtagRange
             didStartTypingHashtag?(partialHashtag: typedString.substringWithRange(unfinishedHashtagRange))
         } else {
+            _isTypingHashtag = false
             clearSuggestedHashtags()
         }
     }
@@ -130,16 +147,12 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
     }
     
     public func showSuggestedHashtags(hashtagSuggestions: [String]) {
+        if !_isTypingHashtag { return }
+        
         _hashtagSuggestions = hashtagSuggestions
         if _tableView == nil {
-            //scroll to correct position
-            let cursorFrame = self.caretRectForPosition(self.selectedTextRange!.start)
-            self.contentOffset = CGPoint(x: 0, y: cursorFrame.origin.y)
-            
             //set up table
             let parentView = window ?? self
-            let tableYPosition = self.frame.origin.y + cursorFrame.height
-            //let tableHeight = parentView.frame.height - tableYPosition
             let tableView = UITableView()
             tableView.translatesAutoresizingMaskIntoConstraints = false
             tableView.tableFooterView = UIView(frame: CGRectZero)
@@ -148,9 +161,21 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
             tableView.dataSource = self
             tableView.delegate = self
             parentView.addSubview(tableView)
-            parentView.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-\(tableYPosition)-[tableView]-0-|", options: [], metrics: nil, views: ["tableView": tableView]))
+            parentView.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-0-[tableView]-0-|", options: [], metrics: nil, views: ["tableView": tableView]))
             parentView.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-0-[tableView]-0-|", options: [], metrics: nil, views: ["tableView": tableView]))
             _tableView = tableView
+            
+            //add table view border
+            let tableViewBorder = UIView()
+            tableViewBorder.translatesAutoresizingMaskIntoConstraints = false
+            tableViewBorder.backgroundColor = UIColor(white: 0.7, alpha: 1)
+            parentView.addSubview(tableViewBorder)
+            _tableViewBorder = tableViewBorder
+            
+            //position table
+            parentView.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:[tableViewBorder(==1)]-0-[tableView]", options: [], metrics: nil, views: ["tableView": tableView, "tableViewBorder": tableViewBorder]))
+            parentView.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-0-[tableViewBorder]-0-|", options: [], metrics: nil, views: ["tableViewBorder": tableViewBorder]))
+            positionTableView()
         } else {
             _tableView?.reloadData()
         }
@@ -165,12 +190,17 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
         }
     }
     
-    override public func layoutSubviews() {
-        super.layoutSubviews()
-        if _tableView != nil {
-            let cursorFrame = self.caretRectForPosition(self.selectedTextRange!.start)
-            self.contentOffset = CGPoint(x: 0, y: cursorFrame.origin.y)
-        }
+    private func positionTableView() {
+        let parentView = window ?? self
+        
+        //scroll to correct position
+        let cursorFrame = self.caretRectForPosition(self.selectedTextRange!.start)
+        self.contentOffset = CGPoint(x: 0, y: cursorFrame.origin.y)
+        
+        //position tableview top constraint
+        let originInWindow = parentView.convertPoint(self.frame.origin, fromView: self.superview ?? UIView())
+        let tableYPosition = originInWindow.y + self.textContainerInset.top + cursorFrame.height + (_tableViewBorder?.frame.height ?? 0)
+        _tableTopConstraint?.constant = tableYPosition
     }
     
     private func clearSuggestedHashtags() {
