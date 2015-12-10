@@ -11,6 +11,9 @@ import UIKit
 public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDataSource, UITableViewDelegate {
     
     public var highlightColor: UIColor?
+    public var tableRowHeight: CGFloat = 36
+    public var tableRowTextColor: UIColor?
+    public var tableBackgroundColor: UIColor = UIColor(white: 0.8, alpha: 1)
     public var didStartTypingHashtag: ((partialHashtag: String) -> ())?
     public var suggestedHashtagHeaderText: String?
     private var _tableView: UITableView?
@@ -58,6 +61,9 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
         let tableViewCell = UITableViewCell()
         tableViewCell.textLabel?.text = _hashtagSuggestions[indexPath.row]
         tableViewCell.textLabel?.font = UIFont.systemFontOfSize(UIFont.systemFontSize())
+        if let textColor = tableRowTextColor {
+            tableViewCell.textLabel?.textColor = textColor
+        }
         return tableViewCell
     }
     
@@ -137,8 +143,8 @@ public class HashtagableTextView: UITextView, UITextViewDelegate, UITableViewDat
             let tableView = UITableView()
             tableView.translatesAutoresizingMaskIntoConstraints = false
             tableView.tableFooterView = UIView(frame: CGRectZero)
-            tableView.backgroundColor = UIColor(white: 0.8, alpha: 1)
-            tableView.rowHeight = 36
+            tableView.backgroundColor = tableBackgroundColor
+            tableView.rowHeight = tableRowHeight
             tableView.dataSource = self
             tableView.delegate = self
             parentView.addSubview(tableView)
