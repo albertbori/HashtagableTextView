@@ -8,7 +8,7 @@
 
 import UIKit
 
-public class HashtagableTextViewDelegate: NSObject, UITextViewDelegate, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate {
+public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate {
     
     public var highlightColor: UIColor?
     public var tableRowHeight: CGFloat = 36

@@ -15,7 +15,7 @@ class TextViewSampleViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let hashtagableDelegate = HashtagableTextViewDelegate(textBox: hashtagableTextView)
+        let hashtagableDelegate = HashtagableTextInputDelegate(textBox: hashtagableTextView)
         hashtagableDelegate.didStartTypingHashtag = { partialHashtag in
             let searchableString = partialHashtag.stringByReplacingOccurrencesOfString("#", withString: "")
             hashtagableDelegate.showSuggestedHashtags(hashtagDatabase.filter({ $0.lowercaseString.containsString(searchableString.lowercaseString) }))
@@ -32,7 +32,7 @@ class TextViewSampleViewController: UIViewController {
     override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
         coordinator.animateAlongsideTransition(
             { [weak self] context in
-                (self?.hashtagableTextView.delegate as? HashtagableTextViewDelegate)?.updateTableViewPosition()
+                (self?.hashtagableTextView.delegate as? HashtagableTextInputDelegate)?.updateTableViewPosition()
             }, completion: { context in })
         super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
     }
