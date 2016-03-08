@@ -15,7 +15,7 @@ class TextViewSampleViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let hashtagableDelegate = HashtagableTextInputDelegate(textBox: hashtagableTextView)
+        let hashtagableDelegate = HashtagableTextInputDelegate(textInput: hashtagableTextView)
         hashtagableDelegate.didStartTypingHashtag = { partialHashtag in
             let searchableString = partialHashtag.stringByReplacingOccurrencesOfString("#", withString: "")
             hashtagableDelegate.showSuggestedHashtags(hashtagDatabase.filter({ $0.lowercaseString.containsString(searchableString.lowercaseString) }))

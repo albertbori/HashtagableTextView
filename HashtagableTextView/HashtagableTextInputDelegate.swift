@@ -1,6 +1,6 @@
 //
-//  HashtagableTextViewDelegate.swift
-//  HashtagableTextView
+//  HashtagableTextInputDelegate.swift
+//  HashtagableTextInput
 //
 //  Created by Albert Bori on 3/7/16.
 //  Copyright © 2016 albertbori. All rights reserved.
@@ -36,9 +36,9 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
     }
     private var _keyboardHeight: CGFloat = 0
     
-    init(textBox: UITextInput) {
+    init(textInput: UITextInput) {
         super.init()
-        _textInput = textBox
+        _textInput = textInput
         
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
@@ -47,14 +47,14 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
     //MARK - UITextViewDelegate
     
     public func textViewDidChange(textView: UITextView) {
-        guard let textBox = _textInput, let text = (textBox as? UITextView)?.text ?? (textBox as? UITextField)?.text else {
+        guard let textInput = _textInput, let text = (textInput as? UITextView)?.text ?? (textInput as? UITextField)?.text else {
             return
         }
         
         highlightHashtags()
         
         //check if user is typing a hashtag, if so, search for it
-        let cursorOffset = textBox.offsetFromPosition(textBox.beginningOfDocument, toPosition: textBox.selectedTextRange!.start)
+        let cursorOffset = textInput.offsetFromPosition(textInput.beginningOfDocument, toPosition: textInput.selectedTextRange!.start)
         let typedString = text.substringWithRange(text.startIndex.advancedBy(0)..<text.startIndex.advancedBy(cursorOffset))
         if let unfinishedHashtagRange = typedString.rangeOfString("(?<=\\B)#\\w{\(minHashtagSearchLength),}\\z", options: [.RegularExpressionSearch, .CaseInsensitiveSearch]) {
             _isTypingHashtag = true
@@ -74,12 +74,12 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
     
     public func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
         
-        guard let textBox = _textInput, let text = (textBox as? UITextView)?.text ?? (textBox as? UITextField)?.text else {
+        guard let textInput = _textInput, let text = (textInput as? UITextView)?.text ?? (textInput as? UITextField)?.text else {
             return true
         }
         
         //check if user is typing a hashtag, if so, search for it
-        let cursorOffset = textBox.offsetFromPosition(textBox.beginningOfDocument, toPosition: textBox.selectedTextRange!.start)
+        let cursorOffset = textInput.offsetFromPosition(textInput.beginningOfDocument, toPosition: textInput.selectedTextRange!.start)
         let typedString = text.substringWithRange(text.startIndex.advancedBy(0)..<text.startIndex.advancedBy(cursorOffset))  + string
         if let unfinishedHashtagRange = typedString.rangeOfString("(?<=\\B)#\\w{\(minHashtagSearchLength),}\\z", options: [.RegularExpressionSearch, .CaseInsensitiveSearch]) {
             _isTypingHashtag = true
@@ -122,13 +122,13 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
     //MARK: - UITableViewDelegate
     
     public func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        guard let textBox = _textInput, let text = (textBox as? UITextView)?.text ?? (textBox as? UITextField)?.text where _hashtagSuggestions.count >= indexPath.row else {
+        guard let textInput = _textInput, let text = (textInput as? UITextView)?.text ?? (textInput as? UITextField)?.text where _hashtagSuggestions.count >= indexPath.row else {
             clearSuggestedHashtags()
             return
         }
         
         //grab cursor position for replacement after change
-        let cursorOffset = textBox.offsetFromPosition(textBox.beginningOfDocument, toPosition: textBox.selectedTextRange!.start)
+        let cursorOffset = textInput.offsetFromPosition(textInput.beginningOfDocument, toPosition: textInput.selectedTextRange!.start)
         let currentLength = text.characters.count
         
         var selectedHashtag = _hashtagSuggestions[indexPath.row]
@@ -136,9 +136,9 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
             selectedHashtag = "#" + selectedHashtag
         }
         
-        if let textView = textBox as? UITextView {
+        if let textView = textInput as? UITextView {
             textView.text.replaceRange(_partialHashtagRange!, with: selectedHashtag + " ")
-        } else if let textField = textBox as? UITextField {
+        } else if let textField = textInput as? UITextField {
             textField.text?.replaceRange(_partialHashtagRange!, with: selectedHashtag + " ")
         }
         
@@ -146,9 +146,9 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
         if cursorOffset != currentLength {
             let lengthDelta = text.characters.count - currentLength
             let newCursorOffset = max(0, min(text.characters.count, cursorOffset + lengthDelta))
-            let newPosition = textBox.positionFromPosition(textBox.beginningOfDocument, offset: newCursorOffset)!
-            let newRange = textBox.textRangeFromPosition(newPosition, toPosition: newPosition)
-            textBox.selectedTextRange = newRange
+            let newPosition = textInput.positionFromPosition(textInput.beginningOfDocument, offset: newCursorOffset)!
+            let newRange = textInput.textRangeFromPosition(newPosition, toPosition: newPosition)
+            textInput.selectedTextRange = newRange
         }
         
         highlightHashtags()
@@ -191,12 +191,12 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
     }
     
     public func showSuggestedHashtags(hashtagSuggestions: [String]) {
-        guard let textBox = _textInput as? UIView where _isTypingHashtag else { return }
+        guard let textInput = _textInput as? UIView where _isTypingHashtag else { return }
         
         _hashtagSuggestions = hashtagSuggestions
         if _tableView == nil {
             //set up table
-            let parentView = textBox.window ?? textBox
+            let parentView = textInput.window ?? textInput
             let tableView = UITableView()
             tableView.translatesAutoresizingMaskIntoConstraints = false
             tableView.tableFooterView = UIView(frame: CGRectZero)
@@ -235,9 +235,9 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
     }
     
     public func updateTableViewPosition() {
-        guard let textBoxAsView = _textInput as? UIView else { return }
+        guard let textInputAsView = _textInput as? UIView else { return }
         
-        let parentView = textBoxAsView.window ?? textBoxAsView
+        let parentView = textInputAsView.window ?? textInputAsView
         
         var textViewCursorOffset: CGFloat = 0
         if let textView = _textInput as? UITextView {
@@ -247,18 +247,18 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
             self.scrollAllToPoint(CGPoint(x: 0, y: cursorFrame.origin.y - lineSpacing))
             textViewCursorOffset = textView.textContainerInset.top + cursorFrame.height + (lineSpacing * 2)
         } else {
-            self.scrollAllToPoint(CGPoint(x: 0, y: textBoxAsView.frame.origin.y))
-            textViewCursorOffset = textBoxAsView.frame.height
+            self.scrollAllToPoint(CGPoint(x: 0, y: textInputAsView.frame.origin.y))
+            textViewCursorOffset = textInputAsView.frame.height
         }
         
         //position tableview top constraint
         var topBarHeight = UIApplication.sharedApplication().statusBarFrame.height
-        if let currentViewController = getCurrentNavigationController(textBoxAsView.window) {
+        if let currentViewController = getCurrentNavigationController(textInputAsView.window) {
             topBarHeight += currentViewController.navigationBar.frame.height
         }
-        var originInWindow = parentView.convertPoint(textBoxAsView.frame.origin, fromView: textBoxAsView.superview ?? UIView())
+        var originInWindow = parentView.convertPoint(textInputAsView.frame.origin, fromView: textInputAsView.superview ?? UIView())
         if originInWindow.y < topBarHeight { //If the origin is negative (inside a scroll view, scrolled down) just use the top of the viewport
-            originInWindow = parentView.convertPoint(textBoxAsView.frame.origin, fromView: textBoxAsView)
+            originInWindow = parentView.convertPoint(textInputAsView.frame.origin, fromView: textInputAsView)
         }
         
         let tableYPosition = originInWindow.y + textViewCursorOffset + (_tableViewBorder?.frame.height ?? 0)
@@ -278,17 +278,17 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
     
     private var _scrollPositionCache = [CGPoint]()
     private func scrollAllToPoint(point: CGPoint) {
-        guard let textBoxAsView = _textInput as? UIView else { return }
+        guard let textInputAsView = _textInput as? UIView else { return }
         
-        var convertPointFromView = textBoxAsView.superview
+        var convertPointFromView = textInputAsView.superview
         if let textView = _textInput as? UITextView where textView.scrollEnabled {
             _scrollPositionCache.append(textView.contentOffset)
             textView.contentOffset = point
-            convertPointFromView = textBoxAsView
+            convertPointFromView = textInputAsView
             //print("Scrolling text view to \(point)")
         }
         
-        var parentView = textBoxAsView.superview
+        var parentView = textInputAsView.superview
         while parentView != nil {
             if let scrollView = parentView as? UIScrollView where scrollView.scrollEnabled {
                 let destinationOffset = CGPoint(x: scrollView.contentOffset.x, y: scrollView.convertPoint(point, fromView: convertPointFromView).y)
@@ -304,9 +304,9 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
         if let textView = _textInput as? UITextView where textView.scrollEnabled {
             textView.contentOffset = _scrollPositionCache.removeFirst() ?? textView.contentOffset
         }
-        guard let textBoxAsView = _textInput as? UIView else { return }
+        guard let textInputAsView = _textInput as? UIView else { return }
         
-        var parentView = textBoxAsView.superview
+        var parentView = textInputAsView.superview
         while parentView != nil {
             if let scrollView = parentView as? UIScrollView where scrollView.scrollEnabled {
                 scrollView.contentOffset = _scrollPositionCache.removeFirst() ?? scrollView.contentOffset
