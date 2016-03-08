@@ -8,22 +8,24 @@
 
 /* Begin PBXBuildFile section */
 		700D276C1C1752E70040820E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700D276B1C1752E70040820E /* AppDelegate.swift */; };
-		700D276E1C1752E70040820E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700D276D1C1752E70040820E /* ViewController.swift */; };
+		700D276E1C1752E70040820E /* TextViewSampleViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700D276D1C1752E70040820E /* TextViewSampleViewController.swift */; };
 		700D27711C1752E70040820E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 700D276F1C1752E70040820E /* Main.storyboard */; };
 		700D27731C1752E70040820E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 700D27721C1752E70040820E /* Assets.xcassets */; };
 		700D27761C1752E70040820E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 700D27741C1752E70040820E /* LaunchScreen.storyboard */; };
-		700D277E1C1753130040820E /* HashtagableTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 700D277D1C1753130040820E /* HashtagableTextView.swift */; };
+		7022E4401C8E0579006F4446 /* HashtagableTextViewDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7022E43F1C8E0579006F4446 /* HashtagableTextViewDelegate.swift */; };
+		706CC9921C88F35C00BBF885 /* TextFieldSampleViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 706CC9911C88F35C00BBF885 /* TextFieldSampleViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		700D27681C1752E70040820E /* HashtagableTextView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HashtagableTextView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		700D276B1C1752E70040820E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		700D276D1C1752E70040820E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		700D276D1C1752E70040820E /* TextViewSampleViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextViewSampleViewController.swift; sourceTree = "<group>"; };
 		700D27701C1752E70040820E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		700D27721C1752E70040820E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		700D27751C1752E70040820E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		700D27771C1752E70040820E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		700D277D1C1753130040820E /* HashtagableTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HashtagableTextView.swift; sourceTree = "<group>"; };
+		7022E43F1C8E0579006F4446 /* HashtagableTextViewDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HashtagableTextViewDelegate.swift; sourceTree = "<group>"; };
+		706CC9911C88F35C00BBF885 /* TextFieldSampleViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextFieldSampleViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,11 +60,12 @@
 			children = (
 				700D276B1C1752E70040820E /* AppDelegate.swift */,
 				700D27721C1752E70040820E /* Assets.xcassets */,
-				700D277D1C1753130040820E /* HashtagableTextView.swift */,
+				7022E43F1C8E0579006F4446 /* HashtagableTextViewDelegate.swift */,
 				700D27771C1752E70040820E /* Info.plist */,
 				700D27741C1752E70040820E /* LaunchScreen.storyboard */,
 				700D276F1C1752E70040820E /* Main.storyboard */,
-				700D276D1C1752E70040820E /* ViewController.swift */,
+				706CC9911C88F35C00BBF885 /* TextFieldSampleViewController.swift */,
+				700D276D1C1752E70040820E /* TextViewSampleViewController.swift */,
 			);
 			path = HashtagableTextView;
 			sourceTree = "<group>";
@@ -139,9 +142,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				700D277E1C1753130040820E /* HashtagableTextView.swift in Sources */,
-				700D276E1C1752E70040820E /* ViewController.swift in Sources */,
+				706CC9921C88F35C00BBF885 /* TextFieldSampleViewController.swift in Sources */,
+				700D276E1C1752E70040820E /* TextViewSampleViewController.swift in Sources */,
 				700D276C1C1752E70040820E /* AppDelegate.swift in Sources */,
+				7022E4401C8E0579006F4446 /* HashtagableTextViewDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
