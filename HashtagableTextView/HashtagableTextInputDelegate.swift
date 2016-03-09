@@ -290,7 +290,7 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
         
         var parentView = textInputAsView.superview
         while parentView != nil {
-            if let scrollView = parentView as? UIScrollView where scrollView.scrollEnabled {
+            if let scrollView = parentView as? UIScrollView where scrollView.scrollEnabled && "\(scrollView.dynamicType)" != "UITableViewWrapperView" {
                 let destinationOffset = CGPoint(x: scrollView.contentOffset.x, y: scrollView.convertPoint(point, fromView: convertPointFromView).y)
                 //print("Scrolling \(scrollView.dynamicType) from \(scrollView.contentOffset) to \(destinationOffset)")
                 _scrollPositionCache.append(scrollView.contentOffset)
