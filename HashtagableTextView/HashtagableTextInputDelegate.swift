@@ -35,6 +35,9 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
         }
     }
     private var _keyboardHeight: CGFloat = 0
+    private var _isFirstResponder: Bool {
+        return (_textInput as? UIView)?.isFirstResponder() == true
+    }
     
     init(textInput: UITextInput) {
         super.init()
@@ -44,14 +47,15 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
     }
     
-    //MARK - UITextViewDelegate
+    //MARK: - UITextViewDelegate
     
     public func textViewDidChange(textView: UITextView) {
-        guard let textInput = _textInput, let text = (textInput as? UITextView)?.text ?? (textInput as? UITextField)?.text else {
-            return
-        }
         
         highlightHashtags()
+        
+        guard let textInput = _textInput, let text = (textInput as? UITextView)?.text ?? (textInput as? UITextField)?.text where _isFirstResponder else {
+            return
+        }
         
         //check if user is typing a hashtag, if so, search for it
         let cursorOffset = textInput.offsetFromPosition(textInput.beginningOfDocument, toPosition: textInput.selectedTextRange!.start)
@@ -70,11 +74,11 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
         clearSuggestedHashtags()
     }
     
-    //MARK - UITextFieldDelegate
+    //MARK: - UITextFieldDelegate
     
     public func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
         
-        guard let textInput = _textInput, let text = (textInput as? UITextView)?.text ?? (textInput as? UITextField)?.text else {
+        guard let textInput = _textInput, let text = (textInput as? UITextView)?.text ?? (textInput as? UITextField)?.text where _isFirstResponder else {
             return true
         }
         
@@ -98,7 +102,7 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
     }
     
     
-    //MARK - UITableViewDataSource
+    //MARK: - UITableViewDataSource
     
     public func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return suggestedHashtagHeaderText
@@ -156,7 +160,7 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
     }
     
     
-    //MARK - Helper methods
+    //MARK: - Helper methods
     
     public func highlightHashtags() {
         guard let textView = _textInput as? UITextView else {
@@ -280,18 +284,16 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
     private func scrollAllToPoint(point: CGPoint) {
         guard let textInputAsView = _textInput as? UIView else { return }
         
-        var convertPointFromView = textInputAsView.superview
-        if let textView = _textInput as? UITextView where textView.scrollEnabled {
+        if let textView = _textInput as? UITextView {
             _scrollPositionCache.append(textView.contentOffset)
             textView.contentOffset = point
-            convertPointFromView = textInputAsView
             //print("Scrolling text view to \(point)")
         }
         
         var parentView = textInputAsView.superview
         while parentView != nil {
             if let scrollView = parentView as? UIScrollView where scrollView.scrollEnabled && "\(scrollView.dynamicType)" != "UITableViewWrapperView" {
-                let destinationOffset = CGPoint(x: scrollView.contentOffset.x, y: scrollView.convertPoint(point, fromView: convertPointFromView).y)
+                let destinationOffset = CGPoint(x: scrollView.contentOffset.x, y: scrollView.convertRect(textInputAsView.frame, fromView: textInputAsView.superview).origin.y)
                 //print("Scrolling \(scrollView.dynamicType) from \(scrollView.contentOffset) to \(destinationOffset)")
                 _scrollPositionCache.append(scrollView.contentOffset)
                 scrollView.contentOffset = destinationOffset
@@ -301,7 +303,7 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
     }
     
     private func restoreScrollPosition() {
-        if let textView = _textInput as? UITextView where textView.scrollEnabled {
+        if let textView = _textInput as? UITextView {
             textView.contentOffset = _scrollPositionCache.removeFirst() ?? textView.contentOffset
         }
         guard let textInputAsView = _textInput as? UIView else { return }
@@ -335,12 +337,13 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
         _keyboardHeight = keyboardSize!.height
         _tableBottomConstraint?.constant = _keyboardHeight
     }
-
+    
     func keyboardWillHide(notification: NSNotification) {
         _keyboardHeight = 0
         _tableBottomConstraint?.constant = 0
+        clearSuggestedHashtags()
     }
-
+    
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
     }
