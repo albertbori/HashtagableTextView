@@ -308,7 +308,7 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
         
         var parentView = textInputAsView.superview
         while parentView != nil {
-            if let scrollView = parentView as? UIScrollView where scrollView.scrollEnabled {
+            if let scrollView = parentView as? UIScrollView where scrollView.scrollEnabled && "\(scrollView.dynamicType)" != "UITableViewWrapperView" {
                 scrollView.contentOffset = _scrollPositionCache.removeFirst() ?? scrollView.contentOffset
             }
             parentView = parentView!.superview
