@@ -39,6 +39,22 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
         return (_textInput as? UIView)?.isFirstResponder() == true
     }
     
+    /**
+     Allows for extending the UITextView behavior by passing in a custom delegate via `userDelegate`
+    */
+    convenience init(textView: UITextView, userDelegate: UITextViewDelegate? = nil) {
+        self.init(textInput: textView)
+        _userTextViewDelegate = userDelegate
+    }
+    
+    /**
+     Allows for extending the UITextField behavior by passing in a custom delegate via `userDelegate`
+     */
+    convenience init(textField: UITextField, userDelegate: UITextFieldDelegate? = nil) {
+        self.init(textInput: textField)
+        _userTextFieldDelegate = userDelegate
+    }
+    
     init(textInput: UITextInput) {
         super.init()
         _textInput = textInput
@@ -46,6 +62,26 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
     }
+    
+    //MARK: - Delegate Forwarder
+    
+    weak var _userTextFieldDelegate: UITextFieldDelegate?
+    weak var _userTextViewDelegate: UITextViewDelegate?
+    
+    override public func respondsToSelector(aSelector: Selector) -> Bool {
+        return super.respondsToSelector(aSelector) || _userTextFieldDelegate?.respondsToSelector(aSelector) == true || _userTextViewDelegate?.respondsToSelector(aSelector) == true
+    }
+    
+    override public func forwardingTargetForSelector(aSelector: Selector) -> AnyObject? {
+        if _userTextFieldDelegate?.respondsToSelector(aSelector) == true {
+            return _userTextFieldDelegate
+        } else if _userTextViewDelegate?.respondsToSelector(aSelector) == true {
+            return _userTextViewDelegate
+        } else {
+            return super.forwardingTargetForSelector(aSelector)
+        }
+    }
+    
     
     //MARK: - UITextViewDelegate
     
@@ -68,10 +104,13 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
             _isTypingHashtag = false
             clearSuggestedHashtags()
         }
+        
+        _userTextViewDelegate?.textViewDidChange?(textView)
     }
     
     public func textViewDidEndEditing(textView: UITextView) {
         clearSuggestedHashtags()
+        _userTextViewDelegate?.textViewDidEndEditing?(textView)
     }
     
     //MARK: - UITextFieldDelegate
@@ -94,11 +133,12 @@ public class HashtagableTextInputDelegate: NSObject, UITextViewDelegate, UITextF
             clearSuggestedHashtags()
         }
         
-        return true
+        return _userTextFieldDelegate?.textField?(textField, shouldChangeCharactersInRange: range, replacementString: string) ?? true
     }
     
     public func textFieldDidEndEditing(textField: UITextField) {
         clearSuggestedHashtags()
+        _userTextFieldDelegate?.textFieldDidEndEditing?(textField)
     }
     
     

@@ -8,14 +8,15 @@
 
 import UIKit
 
-class TextViewSampleViewController: UIViewController {
+class TextViewSampleViewController: UIViewController, UITextViewDelegate {
 
     @IBOutlet weak var hashtagableTextView: UITextView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let hashtagableDelegate = HashtagableTextInputDelegate(textInput: hashtagableTextView)
+//        let hashtagableDelegate = HashtagableTextInputDelegate(textInput: hashtagableTextView)
+        let hashtagableDelegate = HashtagableTextInputDelegate(textView: hashtagableTextView, userDelegate: self)
         hashtagableDelegate.didStartTypingHashtag = { partialHashtag in
             let searchableString = partialHashtag.stringByReplacingOccurrencesOfString("#", withString: "")
             hashtagableDelegate.showSuggestedHashtags(hashtagDatabase.filter({ $0.lowercaseString.containsString(searchableString.lowercaseString) }))
@@ -35,6 +36,10 @@ class TextViewSampleViewController: UIViewController {
                 (self?.hashtagableTextView.delegate as? HashtagableTextInputDelegate)?.updateTableViewPosition()
             }, completion: { context in })
         super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
+    }
+    
+    func textViewDidChange(textView: UITextView) {
+        print("Text view changed!!")
     }
 }
 
